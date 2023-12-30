@@ -29,6 +29,35 @@ dhs_select <- dhs %>% right_join(provinces,
                          by = c("Location" = "Region")) %>%
   filter(IndicatorId %in% indicatorId) %>%
   group_by(Province, IndicatorId, SurveyYear) %>%
-  mutate(Val = mean(as.numeric(Value), na.rm = T))
+  mutate(Val = mean(as.numeric(Value), na.rm = T)) %>%
+  ungroup()
 
+###---Join the two data files to be one
+kenya_province <- kenya_shp %>%
+  left_join(provinces, by = c("COUNTY" = "Region")) %>%
+  group_by(Province)
 
+###---create a basemap for the data
+basemap <- leaflet(options = leafletOptions(minZoom = 5)) %>%
+  setMaxBounds(33.911819, -4.702271, 41.906258, 5.430648) %>%
+  setView(lng=37.818, lat=0.606, zoom=7) %>%
+  addTiles() %>%
+  addPolygons(
+    data = kenya_shp,
+    label = ~COUNTY,
+    weight = 3,
+    color = "black",
+    fillColor = "white",
+    fillOpacity = 0.0
+  )
+
+###--- Define a function to merge the required variable with the kenyan shapefile
+kenya_dhs <- function(data = kenya_province, variable, year) {
+  dhs_select_filter <- dhs_select %>%
+    filter(Indicator == variable) %>%
+    filter(SurveyYear == year)
+  data <- data %>%
+    left_join(dhs_select_filter,
+                             by = "Province")
+  return(data)
+}
