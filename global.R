@@ -3,7 +3,8 @@
 setwd("alx-project")
 
 ###---Load the required packages
-pacman::p_load(readr, dplyr, sf, leaflet)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(readr, dplyr, sf, leaflet)  # Load libraries
 
 ###---Load the required dataset
 dhs <- read_csv("dhs-quickstats_subnational_ken.csv")
@@ -34,8 +35,7 @@ dhs_select <- dhs %>% right_join(provinces,
 
 ###---Join the two data files to be one
 kenya_province <- kenya_shp %>%
-  left_join(provinces, by = c("COUNTY" = "Region")) %>%
-  group_by(Province)
+  left_join(provinces, by = c("COUNTY" = "Region"))
 
 ###---create a basemap for the data
 basemap <- leaflet(options = leafletOptions(minZoom = 5)) %>%
