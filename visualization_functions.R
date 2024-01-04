@@ -1,23 +1,8 @@
-###---Load the required packages
-if (!require("here")) install.packages("here")
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(readr, dplyr, sf, leaflet, ggplot2, tidyr)  # Load libraries
+library(leaflet)
+library(ggplot2)
 
-###--Set the working directory
-setwd(here::here())  # Set working directory
-
-# Data loading and preprocessing
-source("data_loading_and_preprocessing.R")  # Load functions from a separate file
-
-# Visualization functions
-source("visualization_functions.R")  # Load functions from a separate file
-
-
-##---Visualization function
-
-# Create basemap function
-create_basemap <- function() {
-  leaflet() %>%
+create_basemap <- function(data) {
+  leaflet(data) %>%
     setMaxBounds(33.911819, -4.702271, 41.906258, 5.430648) %>%
     setView(lng = 37.818, lat = 0.606, zoom = 7) %>%
     addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap") %>%
@@ -37,7 +22,3 @@ create_basemap <- function() {
       onClick = JS("function(btn, map){ map.fitBounds(map.getBounds()); }"))) %>%
     hideGroup("province_boundaries")  # Hide initial boundaries
 }
-
-
-
-          
