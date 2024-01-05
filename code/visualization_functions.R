@@ -1,16 +1,17 @@
-library(leaflet)
-library(ggplot2)
-
+# Create basemap function
 create_basemap <- function(data) {
   leaflet(data) %>%
-    setMaxBounds(33.911819, -4.702271, 41.906258, 5.430648) %>%
+    setMaxBounds(32, -4, 42, 6) %>%
     setView(lng = 37.818, lat = 0.606, zoom = 7) %>%
     addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap") %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "Esri") %>%
-    addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
-    addProviderTiles(providers$Stamen.Toner, group = "Toner") %>%
+    addProviderTiles("MapBox", options = providerTileOptions(
+      id = "mapbox.light",
+      accessToken = Sys.getenv('MAPBOX_ACCESS_TOKEN')), group = "MapBox") %>%
+    addProviderTiles(providers$Stadia.StamenTerrain, group = "Terrain") %>%
+    addProviderTiles(providers$Stadia.StamenToner, group = "Toner") %>%
     addLayersControl(
-      baseGroups = c("OpenStreetMap", "Esri", "Terrain", "Toner"),
+      baseGroups = c("OpenStreetMap", "Esri", "MapBox", "Terrain", "Toner"),
       options = layersControlOptions(collapsed = TRUE),
       position = "bottomright"
     ) %>%
