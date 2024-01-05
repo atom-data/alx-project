@@ -2,7 +2,7 @@
 load_and_preprocess_shapefile <- function() {
   tryCatch(
     {
-      kenya_counties_sf <- st_read(dsn = getwd(), layer = "County") %>%
+      kenya_counties_sf <- st_read(dsn = "data/shapefile", layer = "County") %>%
         select(COUNTY, geometry) %>%
         mutate(
           county_name = case_when(
@@ -26,12 +26,12 @@ load_and_preprocess_shapefile <- function() {
 load_and_filter_survey_data <- function() {
   tryCatch(
     {
-      filtered_province_data <- read_csv("dhs-quickstats_subnational_ken.csv") %>%
+      filtered_province_data <- read_csv("data/dhs-quickstats_subnational_ken.csv") %>%
         # Select desired indicators
         filter(IndicatorId %in% c("FE_FRTR_W_TFR", "CH_VACC_C_BAS", "CM_ECMR_C_IMR", "CM_ECMR_C_U5M", "CN_BFDR_C_MDE")) %>%
         
         # Join province data
-        right_join(read_csv("province.csv"), by = c("Location" = "Region")) %>%
+        right_join(read_csv("data/province.csv"), by = c("Location" = "Region")) %>%
         
         # Tidy the join column
         mutate(province_name = factor(Province, levels = unique(Province))) %>%

@@ -3,14 +3,11 @@ if (!require("here")) install.packages("here")
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(readr, dplyr, sf, leaflet, ggplot2, tidyr)  # Load libraries
 
-###--Set the working directory
-setwd(here::here())  # Set working directory
-
 # Data loading and preprocessing
-source("data_loading_and_preprocessing.R")  # Load functions from a separate file
+source("code/data_loading_and_preprocessing.R")  # Load functions from a separate file
 
 # Visualization functions
-source("visualization_functions.R")  # Load functions from a separate file
+source("code/visualization_functions.R")  # Load functions from a separate file
 
 
 ##---Visualization function
