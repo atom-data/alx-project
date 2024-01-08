@@ -1,17 +1,18 @@
 # Load required packages
-pacman::p_load(shiny, shinydashboard)
+pacman::p_load(shiny, shinydashboard, plotly, leaflet)
 
 # Load functions from global.R file
 source("app/global.R")
+merged_data <- merge_data()
 
 # Define the dashboard header
-header <- dashboardHeader(
+header <-   dashboardHeader(
   title = "Kenya Watch",
-  titleWidth = 350,
-  logo = tags$img(src = "logo.png", height = "50px", align = "left")
+  titleWidth = 300  # Adjust as needed for logo
 )
 
-# Define the dashboard siderbar
+
+# # # Define the dashboard siderbar
 sidebar <-   dashboardSidebar(
   sidebarMenu(
     menuItem("Overview", tabName = "overview", icon = icon("chart-bar")),
@@ -112,5 +113,9 @@ body <- dashboardBody(
     )
   )
 )
-
+#sidebar <- dashboardSidebar()
+#body <- dashboardBody()
 ui <- dashboardPage(header = header, sidebar = sidebar, body = body)
+
+server <- function(input, output, session) {}
+shinyApp(ui = ui, server = server)
