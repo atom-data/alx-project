@@ -1,5 +1,5 @@
 # Load required packages
-pacman::p_load(shiny, shinydashboard)
+pacman::p_load(shiny, shinydashboard, DT)
 
 # Load functions from global.R file
 source("app/global.R")
