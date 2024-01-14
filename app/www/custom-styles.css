@@ -1,0 +1,55 @@
+/* Colors */
+:root {
+  --primary-color: #4285F4;
+  --secondary-color: #F5DEB3;
+  --light-color: #F8F9FA;
+  --dark-color: #333333;
+}
+
+/* Fonts */
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+}
+
+/* card class */
+.card {
+  border: 1px solid #eee;
+  border-radius: 4px; /* Add rounded corners for a softer look */
+  padding: 15px;
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card .box-title {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* Visual Elements */
+/* Padding for visual breathing space */
+body, .container, .row, .col {
+  padding: 0.5rem;
+}
+
+/* Title Sizes */
+h1, h2, h3, h4, h5, h6 {
+  /* Adjust title sizes based on content and layout */
+}
+
+/* Sidebar */
+/* Customize sidebar elements with bs_sidebar() */
+.sidebar {
+  /* Add your custom styles */
+}
+
+/* Header */
+/* Customize header elements with bs_navbar() */
+.navbar {
+  /* Add your custom styles */
+}
+
+/* Additional Recommendations */
+/* Maintain accessibility with sufficient color contrast */
+/* Experiment and refine based on data and layout */

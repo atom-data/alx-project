@@ -37,18 +37,28 @@ create_legend <- function(data, values, colors, title = "Legend") {
 }
 
 # create a choropleth map function:
-create_choropleth_map <- function(data, variable, year) {
+create_choropleth_map <- function(map, data, variable, year) {
   # Validate data (example)
   if (is.null(data) || is.null(variable) || is.null(year)) {
     stop("Invalid input data or parameters.")
   }
-  
-  filtered_data <- data %>% filter(indicator_id == variable, survey_year == year)
+  # print("data:\n", data)
+  # print("variable:\n", variable)
+  # print("year:\n", year)
+  filtered_data <- data %>%
+    filter(indicator_id == variable, survey_year == year) %>%
+    group_by(province_name) %>%
+    summarise(
+      indicator_label = first(indicator_label),
+      mean_value = round(first(mean_value), 2),
+      counties = paste(sort(county_name), collapse = ", ")  # Combine counties for popup
+    )
+  #print("Filtered data:\n", filtered_data)
   pal <- colorNumeric("YlOrRd", domain = filtered_data$mean_value, na.color = "transparent")
-  
-  leafletProxy("map") %>%
-    clearShapes() %>%
-    addPolygons(
+      
+    map %>%
+     clearShapes() %>%
+     addPolygons(
       data = filtered_data,
       group = "province_boundaries",
       layerId = ~province_name,
@@ -61,12 +71,16 @@ create_choropleth_map <- function(data, variable, year) {
         color = "#666",
         bringToFront = TRUE
       ),
-      popup = ~paste0("<strong>Province:</strong> ", province_name, "<br/>",
-                      "<strong>Counties:</strong> ", paste(county_name, collapse = ", "), "<br/>",
-                      "<strong>Variable:</strong> ", variable, "<br/>",
-                      "<strong>Year:</strong> ", year, "<br/>",
-                      "<strong>Mean Value:</strong> ", mean_value)
+      popup = ~paste0(
+        "<strong>Province:</strong> ", province_name, "<br/>",
+        "<strong>Counties:</strong> ", counties, "<br/>",  # Use combined counties
+        "<strong>Indicator:</strong> ", indicator_label, "<br/>",
+        "<strong>Indicator Index:</strong> ", variable, "<br/>",
+        "<strong>Year:</strong> ", year, "<br/>",
+        "<strong>Mean Value:</strong> ", mean_value
+      )
     ) %>%
     showGroup("province_boundaries") %>%  # Show the hidden group
-    create_legend(values = ~filtered_data$mean_value, colors = pal)
+    create_legend(values = ~filtered_data$mean_value, colors = pal, title = first(filtered_data$indicator_label))
 }
+

@@ -44,7 +44,7 @@ load_and_filter_survey_data <- function() {
         
         # Ungroup and create indicator labels
         ungroup() %>%
-        mutate(indicator_label = paste0(as.character(indicator_id), ": ", Indicator)) %>%  # Use the preserved "Indicator"
+        mutate(indicator_label = Indicator) %>%  # Use the preserved "Indicator"
         
         select(county_name, province_name, indicator_id, indicator_label, survey_year, mean_value)
       

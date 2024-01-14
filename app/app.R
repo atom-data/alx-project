@@ -1,7 +1,7 @@
 # Load required packages
 pacman::p_load(shiny, shinydashboard, plotly, leaflet, bslib)
 
-# Load functions from global.R file
+# Load global file
 source("app/global.R")
 merged_data <- merge_data()
 
@@ -24,39 +24,42 @@ sidebar <- dashboardSidebar(
     selectInput("region", "Region:", choices = c("Province", "County")),
     conditionalPanel(
       condition = "input.region == 'Province'",
-      selectInput("province", "Province:", choices = c("All", unique(merged_data$province_name)))
+      selectInput("province", "Province:", choices = c("All", sort(unique(as.character(merged_data$province_name)))))
     ),
     conditionalPanel(
       condition = "input.region == 'County'",
-      selectInput("county", "County:", choices = c("All", unique(merged_data$county_name)))
+      selectInput("county", "County:", choices = c("All", sort(unique(merged_data$county_name))))
     ),
     selectInput("variable", "Variable:", choices = c("All", unique(merged_data$indicator_label))),
     sliderInput("year", "Year:", min = min(as.numeric(merged_data$survey_year)), max = max(as.numeric(merged_data$survey_year)), value = max(as.numeric(merged_data$survey_year)), sep = ""),
     radioButtons("plot_type", "Plot Type:", choices = c("Time Series", "Histogram", "Scatter")),
     conditionalPanel(
       condition = "input.plot_type == 'Scatter'",
-      selectInput("scatter_var", "Additional Variable:", choices = "...")
+      selectInput("scatter_var", "Additional Variable:", choices = c("All", sort(unique(merged_data$indicator_label))))
     )
   ),
   
   # Filtering options for Data Exploration tab
   conditionalPanel(
     condition = "input.sidebarItem == 'data_exploration'",
-    selectInput("year_filter", "Year:", choices = c("All", unique(merged_data$survey_year))),
-    selectInput("county_filter", "County:", choices = c("All", unique(merged_data$county_name))),
-    selectInput("province_filter", "Province:", choices = c("All", unique(merged_data$province_name))),
-    selectInput("indicator_filter", "Indicator:", choices = c("All", unique(merged_data$indicator_label))),
-    selectInput("indicator_id_filter", "Indicator ID:", choices = c("All", unique(merged_data$indicator_id)))
+    selectInput("year_filter", "Year:", choices = c("All", sort(unique(merged_data$survey_year)))),
+    selectInput("county_filter", "County:", choices = c("All", sort(unique(merged_data$county_name)))),
+    selectInput("province_filter", "Province:", choices = c("All", sort(unique(as.character(merged_data$province_name))))),
+    selectInput("indicator_filter", "Indicator:", choices = c("All", sort(unique(merged_data$indicator_label))))
   )
 )
 
 # Define the dashboard body
 body <- dashboardBody(
+  tags$head(
+    includeCSS("app/www/custom-styles.css")
+  ),
   tabItems(
     tabItem(
       tabName = "overview",
       fluidRow(
-        column(width = 6,
+        # Leaflet map takes the full width of the row
+        column(width = 12,
                box(
                  width = NULL,
                  leafletOutput("map", height = 500),
@@ -64,12 +67,16 @@ body <- dashboardBody(
                  status = "primary"
                )
         ),
-        column(width = 6,
-               box(
-                 width = NULL,
-                 plotlyOutput("plot", height = 500),
-                 title = "Graphical Plot",
-                 status = "primary"
+        # Graphical plot at the bottom, full width
+        column(width = 12,
+               div(
+                 class = "card",  # Add the card class for visual styling
+                 box(
+                   width = NULL,
+                   plotlyOutput("plot", height = 500),
+                   title = "Graphical Plot",
+                   status = "primary"
+                 )
                )
         )
       )
@@ -77,15 +84,7 @@ body <- dashboardBody(
     tabItem(
       tabName = "data_exploration",
       fluidRow(
-        column(width = 4,
-               box(
-                 title = "Filtering Options",
-                 width = NULL,
-                 status = "info",
-                 solidHeader = TRUE
-               )
-        ),
-        column(width = 8,
+        column(width = 12, # Use the full width of the row
                box(
                  title = "Data Table",
                  width = NULL,
@@ -104,13 +103,26 @@ body <- dashboardBody(
   )
 )
 
+
 # Create the Shiny app
-ui <- dashboardPage(header, sidebar, body)
+#ui <- dashboardPage(header, sidebar, body)
 
 
 #sidebar <- dashboardSidebar()
 #body <- dashboardBody()
 ui <- dashboardPage(header = header, sidebar = sidebar, body = body)
 
-server <- function(input, output, session) {}
+server <- function(input, output, session) {
+  # Create basemap (this stays static)
+  output$map <- renderLeaflet({
+    create_basemap(merged_data)
+  })
+  
+  # Generate choropleth map when user changes selections
+  observeEvent({
+    input$year
+  }, {
+    create_choropleth_map(data = merged_data, variable = "FE_FRTR_W_TFR", year= "2014")
+  })
+}
 shinyApp(ui = ui, server = server)
