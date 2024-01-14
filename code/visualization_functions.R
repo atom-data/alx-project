@@ -1,3 +1,5 @@
+# Load the required libraries
+pacman::p_load(leaflet, dplyr, htmltools)
 # Create basemap function
 create_basemap <- function(data) {
   leaflet(data) %>%
@@ -53,8 +55,15 @@ create_choropleth_map <- function(map, data, variable, year) {
       mean_value = round(first(mean_value), 2),
       counties = paste(sort(county_name), collapse = ", ")  # Combine counties for popup
     )
-  #print("Filtered data:\n", filtered_data)
-  pal <- colorNumeric("YlOrRd", domain = filtered_data$mean_value, na.color = "transparent")
+  print("Filtration complete")
+  # Assuming filtered_data is supposed to be a data frame
+  if (!is.null(filtered_data) && "mean_value" %in% colnames(filtered_data)) {
+    pal <- colorNumeric("YlOrRd", domain = filtered_data$mean_value, na.color = "transparent")
+  } else {
+    # Handle the case when filtered_data is NULL or doesn't contain "mean_value"
+    # You can provide a default value, skip the operation, or take appropriate action.
+    Print("Some of your inputs are invalid") # Example with a default domain
+  }
       
     map %>%
      clearShapes() %>%

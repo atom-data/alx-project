@@ -38,7 +38,7 @@ load_and_filter_survey_data <- function() {
         
         # Group and calculate mean, preserving "Indicator"
         group_by(province_name, indicator_id = IndicatorId, survey_year = SurveyYear) %>%
-        summarise(mean_value = mean(as.numeric(Value), na.rm = TRUE),
+        summarise(mean_value = round(mean(as.numeric(Value), na.rm = TRUE), 2),
                   Indicator = first(Indicator),
                   county_name = list(unique(Location))) %>%
         

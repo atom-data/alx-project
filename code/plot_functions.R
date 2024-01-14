@@ -3,7 +3,6 @@ pacman::p_load(plotly, dplyr)
 
 create_plotly_plot <- function(data, region, province, variable, year, plot_type, scatter_var) {
   
-  # Filter data based on user selections
   # Filter data based on user selections and plot type
   filtered_data <- if (plot_type == "Time Series") {
     data %>%
@@ -26,7 +25,7 @@ create_plotly_plot <- function(data, region, province, variable, year, plot_type
   }
   
   # Create the plot based on plot_type
-  if (plot_type == "Time Series") {
+  if (plot_type == "Time Series" && province != "All") {
     plot_ly(filtered_data, x = ~survey_year, y = ~mean_value, type = "scatter", mode = "lines+markers") %>%
       layout(
         title = paste("Time Series of", variable, "in", province),
@@ -49,7 +48,7 @@ create_plotly_plot <- function(data, region, province, variable, year, plot_type
         plot_bgcolor = "whitesmoke",                   # Background color
         paper_bgcolor = "whitesmoke"                  # Background color
       )
-  } else if (plot_type == "Scatter") {
+  } else if (plot_type == "Scatter" && scatter_var != "All") {
     plot_ly(filtered_data, x = ~get(variable), y = ~get(scatter_var)) %>%  # Access variables directly
       add_markers() %>%
       layout(
