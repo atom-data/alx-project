@@ -38,38 +38,42 @@ create_legend <- function(data, values, colors, title = "Legend") {
   )
 }
 
-# create a choropleth map function:
-create_choropleth_map <- function(map, data, variable, year) {
-  # Validate data (example)
-  if (is.null(data) || is.null(variable) || is.null(year)) {
-    stop("Invalid input data or parameters.")
-  }
-  # print("data:\n", data)
-  # print("variable:\n", variable)
-  # print("year:\n", year)
+# Function to validate inputs
+validate_choropleth_inputs <- function(data, variable, year) {
+  validate(
+    need(data, "Data is missing"),
+    need(variable, "Variable is missing"),
+    need(year, "Year is missing")
+  )
+}
+
+# Function to filter and summarize data
+prepare_choropleth_data <- function(data, variable, year) {
   filtered_data <- data %>%
-    filter(indicator_id == variable, survey_year == year) %>%
+    filter(indicator_label == variable, survey_year == year) %>%
     group_by(province_name) %>%
     summarise(
       indicator_label = first(indicator_label),
       mean_value = round(first(mean_value), 2),
-      counties = paste(sort(county_name), collapse = ", ")  # Combine counties for popup
+      counties = paste(sort(county_name), collapse = ", ")
     )
-  print("Filtration complete")
-  # Assuming filtered_data is supposed to be a data frame
-  if (!is.null(filtered_data) && "mean_value" %in% colnames(filtered_data)) {
-    pal <- colorNumeric("YlOrRd", domain = filtered_data$mean_value, na.color = "transparent")
-  } else {
-    # Handle the case when filtered_data is NULL or doesn't contain "mean_value"
-    # You can provide a default value, skip the operation, or take appropriate action.
-    Print("Some of your inputs are invalid") # Example with a default domain
-  }
-      
-    map %>%
-     clearShapes() %>%
-     addPolygons(
-      data = filtered_data,
-      group = "province_boundaries",
+  
+  return(filtered_data)
+}
+
+
+# Function to create the color palette
+create_choropleth_palette <- function(data) {
+  colorNumeric("YlOrRd", domain = data$mean_value, na.color = "transparent")
+}
+
+# Function to update the leaflet map with choropleth data
+update_choropleth_map <- function(mapId = "map", data, pal) {
+  leafletProxy(mapId) %>%
+   clearShapes() %>%
+    addPolygons(
+      data = data,
+      group = "choropleth_map",
       layerId = ~province_name,
       stroke = FALSE,
       smoothFactor = 0.2,
@@ -82,14 +86,29 @@ create_choropleth_map <- function(map, data, variable, year) {
       ),
       popup = ~paste0(
         "<strong>Province:</strong> ", province_name, "<br/>",
-        "<strong>Counties:</strong> ", counties, "<br/>",  # Use combined counties
+        "<strong>Counties:</strong> ", counties, "<br/>",
         "<strong>Indicator:</strong> ", indicator_label, "<br/>",
-        "<strong>Indicator Index:</strong> ", variable, "<br/>",
         "<strong>Year:</strong> ", year, "<br/>",
         "<strong>Mean Value:</strong> ", mean_value
       )
     ) %>%
-    showGroup("province_boundaries") %>%  # Show the hidden group
-    create_legend(values = ~filtered_data$mean_value, colors = pal, title = first(filtered_data$indicator_label))
+    showGroup("choropleth_map") %>%
+    create_legend(values = ~data$mean_value, colors = pal, title = first(data$indicator_label))
 }
+
+# Main function to create the choropleth map
+create_choropleth_map <- function(mapId = "map", data, variable, year) {
+  validate_choropleth_inputs(data, variable, year)
+  
+  filtered_data <- prepare_choropleth_data(data, variable, year)
+  
+  if (!is.null(filtered_data) && "mean_value" %in% colnames(filtered_data)) {
+    pal <- create_choropleth_palette(filtered_data)
+    update_choropleth_map(filtered_data, pal)
+  } else {
+    showNotification("Invalid data or missing columns for choropleth map.", type = "error")
+  }
+}
+
+
 
